@@ -1,1 +1,66 @@
-PARTICIPANTS: use this file for creating the class diagram in mastery task 01
+@startuml
+class GetBookActivity{
+    -recommendationsServiceClient : RecommendationsServiceClient
+    -catalogDao : CatalogDao
+    +execute(request : GetBookRequest) : GetBookResponse
+}
+class GetPublishingStatusActivity{
+    +execute(publishingStatusRequest : GetPublishingStatusRequest) : GetPublishingStatusResponse
+}
+class RemoveBookFromCatalogActivity{
+    -execute(removeBookFromCatalogRequest : RemoveBookFromCatalogRequest) : RemoveBookFromCatalogResponse
+}
+class SubmitBookForPublishingActivity{
+    -publishingStatusDao : PublishingStatusDao
+    +execute(SubmitBookForPublishingRequest : request) : SubmitBookForPublishingResponse
+}
+
+class RecommendationsServiceClient{
+    -recommandationService : RecommendationService
+    +getBookRecommendations(genre : BookGenre) : List<BookRecommendation>
+}
+
+class CatalogDao{
+    -dynamoDbMapper : DynamoDBMapper
+    +getBookFromCatalog(bookId : String) : CatalogItemVersion
+    +getLatestVersionOfBook(bookId : String) : CatalogItemVersion
+}
+class PublishingStatusDao{
+    -ADDITIONAL_NOTES_PREFIX : String
+    -dynamoDbMapper : DynamoDBMapper
+    +setPublishingStatus(publishingRecordId : String, publishingRecordStatus : PublishingRecordStatus, bookId: String) : PublishingStatusItem
+    +setPublishingStatus(publishingRecordId : String, publishingRecordStatus : PublishingRecordStatus, bookId: String, message:String) : PublishingStatusItem
+}
+
+class CatalogItemVersion {
+    -@DynamoDBHashKey bookId : String
+    -@DynamoDBRangeKey version : int
+    -inactive : boolean
+    -title : String
+    -author : String
+    -text : String
+    -genre : BookGenre
+}
+class PublishingStatusItem{
+    -@DynamoDBHashKey publishingRecordId : String
+    -@DynamoDBRangeKey status : PublishingRecordStatus
+    -statusMessage : String
+    -bookId : String
+}
+
+class BookNotFoundException {
+    -serialVersionUID : Long
+}
+class PublishingStatusNotFoundException{
+    -serialVersionUID : Long
+}
+
+
+GetBookActivity o-- RecommendationsServiceClient
+GetBookActivity o-- CatalogDao
+SubmitBookForPublishingActivity o-- PublishingStatusDao
+CatalogItemVersion --o CatalogDao
+PublishingStatusItem --o PublishingStatusDao
+CatalogDao o-- BookNotFoundException
+
+@enduml

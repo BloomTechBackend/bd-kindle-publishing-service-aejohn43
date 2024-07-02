@@ -126,4 +126,49 @@ public class CatalogDaoTest {
         assertEquals(bookId, queriedItem.getBookId(), "Expected query to look for provided bookId");
         assertEquals(1, requestCaptor.getValue().getLimit(), "Expected query to have a limit set");
     }
+    @Test void removeBook_activeId_bookRemoved() {
+        //GIVEN
+        String bookId = "book.123";
+        CatalogItemVersion item = new CatalogItemVersion();
+        item.setBookId(bookId);
+        item.setInactive(false);
+        when(dynamoDbMapper.query(eq(CatalogItemVersion.class), any(DynamoDBQueryExpression.class))).thenReturn(list);
+        when(list.isEmpty()).thenReturn(false);
+        when(list.get(0)).thenReturn(item);
+        //WHEN
+        catalogDao.removeBook(bookId);
+
+        //THEN
+        verify(dynamoDbMapper).save(item);
+    }
+
+    @Test
+    public void removeBook_bookDoesNotExist_throwsException() {
+        // GIVEN
+        String invalidBookId = "notABookID";
+        when(dynamoDbMapper.query(eq(CatalogItemVersion.class), any(DynamoDBQueryExpression.class))).thenReturn(list);
+        when(list.isEmpty()).thenReturn(true);
+
+        // WHEN && THEN
+        assertThrows(BookNotFoundException.class, () -> catalogDao.removeBook(invalidBookId),
+                "Expected BookNotFoundException to be thrown for an invalid bookId.");
+    }
+
+    @Test
+    public void removeBook_bookInactive_throwsException() {
+        // GIVEN
+        String bookId = "book.123";
+        CatalogItemVersion item = new CatalogItemVersion();
+        item.setInactive(true);
+        item.setBookId(bookId);
+        item.setVersion(1);
+
+        when(dynamoDbMapper.query(eq(CatalogItemVersion.class), any(DynamoDBQueryExpression.class))).thenReturn(list);
+        when(list.isEmpty()).thenReturn(false);
+        when(list.get(0)).thenReturn(item);
+
+        // WHEN && THEN
+        assertThrows(BookNotFoundException.class, () -> catalogDao.removeBook(bookId),
+                "Expected BookNotFoundException to be thrown for an invalid bookId.");
+    }
 }
