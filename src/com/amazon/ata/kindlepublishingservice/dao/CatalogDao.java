@@ -68,6 +68,7 @@ public class CatalogDao {
                 throw new BookNotFoundException(String.format("No book found for id: %s", bookId));
             }
             book.setBookId(bookId);
+            book.setInactive(true);
             dynamoDbMapper.save(book);
     }
 }
