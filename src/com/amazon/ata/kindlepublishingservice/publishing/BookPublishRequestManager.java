@@ -1,11 +1,14 @@
 package com.amazon.ata.kindlepublishingservice.publishing;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.concurrent.ConcurrentLinkedQueue;
 
-public class BookPublishRequestManager {
-    private Queue<BookPublishRequest> collectionBookPublishRequest = new LinkedList<>();
+@Singleton
+final public class BookPublishRequestManager {
+    final private ConcurrentLinkedQueue<BookPublishRequest> collectionBookPublishRequest = new ConcurrentLinkedQueue<>();
     @Inject
     public BookPublishRequestManager (){
     }
@@ -17,6 +20,6 @@ public class BookPublishRequestManager {
         if (collectionBookPublishRequest.isEmpty()) {
             return null;
         }
-        return collectionBookPublishRequest.remove();
+        return collectionBookPublishRequest.poll();
     }
 }

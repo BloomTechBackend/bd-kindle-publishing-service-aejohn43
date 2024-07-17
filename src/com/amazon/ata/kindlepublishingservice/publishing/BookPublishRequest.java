@@ -20,7 +20,7 @@ public final class BookPublishRequest {
         this.title = builder.title;
         this.author = builder.author;
         this.text = builder.text;
-        this.genre = builder.genre;
+        this.genre =  builder.genre;
     }
 
     public String getPublishingRecordId() {
